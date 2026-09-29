@@ -1,0 +1,18 @@
+# OpenTofu working data and state
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Backend settings, credentials, and local environment files
+*.tfbackend
+!backend.tfbackend.example
+.env
+.env.*
+!.env.example
+!.env.op.example
+
+# Saved plans
+*.tfplan
+*.plan

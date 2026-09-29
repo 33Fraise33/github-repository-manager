@@ -1,0 +1,23 @@
+#!/bin/sh
+set -eu
+
+if [ -n "${AWS_ACCESS_KEY_ID:-}" ] || [ -n "${AWS_SECRET_ACCESS_KEY:-}" ]; then
+  : "${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must both be set}"
+  : "${AWS_SECRET_ACCESS_KEY:?AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must both be set}"
+  exec tofu "$@"
+fi
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+env_file="$repo_root/.env.op"
+
+if [ ! -f "$env_file" ]; then
+  printf '%s\n' "Missing $env_file. Copy .env.op.example and set OP_VAULT." >&2
+  exit 1
+fi
+
+if ! command -v op >/dev/null 2>&1; then
+  printf '%s\n' "1Password CLI is required when R2 credentials are not already set." >&2
+  exit 1
+fi
+
+exec op run --env-file="$env_file" -- tofu "$@"

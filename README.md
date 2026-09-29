@@ -2,7 +2,11 @@
 
 OpenTofu configuration for creating and consistently configuring new Ansible role repositories in a personal GitHub account.
 
-This directory is a project starter, not OpenTofu configuration yet. Complete the task files in numerical order. Each task is intentionally self-contained so an agent can implement and validate one change at a time.
+This directory contains the initial OpenTofu state-backend configuration. Complete the task files in numerical order. Each task is intentionally self-contained so an agent can implement and validate one change at a time.
+
+## State Backend
+
+Cloudflare R2 is the selected remote state backend. Read the [backend ADR](docs/adr/0001-opentofu-state-backend.md) and [R2 backend operating guide](docs/state-backend.md) before initializing it. Routine local validation must use `tofu init -backend=false`; remote initialization and all state-changing operations require explicit operator approval.
 
 ## Scope
 

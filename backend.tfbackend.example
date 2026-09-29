@@ -1,0 +1,7 @@
+# Copy this file to backend.tfbackend and replace the placeholders. Do not
+# commit backend.tfbackend: it identifies the private R2 account and bucket.
+bucket = "replace-with-private-r2-bucket-name"
+
+endpoints = {
+  s3 = "https://replace-with-cloudflare-account-id.eu.r2.cloudflarestorage.com"
+}
