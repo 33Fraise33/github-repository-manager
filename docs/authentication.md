@@ -23,7 +23,7 @@ settings used by the repository module.
 
 Use the shortest practical expiration and record the expiry in the approved
 secret manager. Review these permissions when Tasks 04 and 05 finalize the
-repository and template resources.
+repository and ruleset resources.
 
 ## Repository Access Limitation
 

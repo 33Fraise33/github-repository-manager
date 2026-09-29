@@ -1,0 +1,19 @@
+# Copy selected entries into the tracked repositories.auto.tfvars catalog only
+# after a reviewed plan and explicit operator approval. This example is not
+# loaded automatically.
+repositories = {
+  public-example = {
+    name        = "example-public-repository"
+    description = "Placeholder public repository."
+    visibility  = "public"
+    topics      = ["example", "public"]
+    homepage    = "https://example.invalid/example-public-repository"
+  }
+
+  private-example = {
+    name        = "example-private-repository"
+    description = "Placeholder private repository."
+    visibility  = "private"
+    topics      = ["example", "private"]
+  }
+}

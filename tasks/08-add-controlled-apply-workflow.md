@@ -2,7 +2,9 @@
 
 ## Objective
 
-Provide an explicitly operator-approved CI path for applying reviewed OpenTofu changes after the remote state backend and plan workflow are proven.
+Provide an explicitly operator-approved CI path for applying reviewed OpenTofu
+repository-infrastructure changes after the remote state backend and plan
+workflow are proven.
 
 ## Prerequisites
 
@@ -12,7 +14,7 @@ Provide an explicitly operator-approved CI path for applying reviewed OpenTofu c
 ## Required Work
 
 1. Add a manually dispatched workflow limited to the default branch.
-2. Require an explicit typed confirmation input containing the intended workspace/environment and commit SHA.
+2. Require an explicit typed confirmation input containing the intended workspace or environment and commit SHA.
 3. Generate a plan and apply that exact saved plan in the same protected run. Do not apply a newly generated unreviewed plan.
 4. Add concurrency and backend locking so only one apply can run.
 5. Fail closed if the plan includes deletion, replacement, rename, archive/unarchive, transfer, or visibility changes. Require a separate operator-approved override mechanism if such changes are ever needed.
@@ -29,9 +31,10 @@ Provide an explicitly operator-approved CI path for applying reviewed OpenTofu c
 ## Validation
 
 - Validate workflow syntax and permissions.
-- Exercise the workflow in plan-only/dry-run form before giving approval for a real apply.
+- Exercise the workflow in plan-only form before giving approval for a real apply.
 - Do not create a repository during validation without explicit approval.
 
 ## Out Of Scope
 
-- Automated repository provisioning on merge.
+- Automated infrastructure provisioning on merge.
+- Repository content deployment.

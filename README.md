@@ -1,6 +1,6 @@
 # GitHub Repository Manager
 
-OpenTofu configuration for creating and consistently configuring new Ansible role repositories in a personal GitHub account.
+OpenTofu configuration for creating and consistently configuring new GitHub repositories in a personal account.
 
 This directory contains OpenTofu configuration for the state backend and project
 bootstrap. Complete the task files in numerical order. Each task is intentionally
@@ -37,10 +37,15 @@ validation.
 
 ## Scope
 
-- Create and manage newly created `ansible-role-*` repositories.
+- Create and manage newly created repositories with normalized lowercase,
+  hyphenated names.
 - Support public and private repositories.
 - Apply consistent repository settings, topics, merge policy, and security features where GitHub supports them.
-- Provide a separately managed role template and a pilot rollout path.
+- Provide a generic pilot rollout path.
+
+## Repository Catalog
+
+New repositories are declared through the typed [`repositories` catalog](docs/repository-catalog.md). The catalog is empty by default; its example file contains placeholders only and does not create repositories.
 
 ## Non-goals
 
@@ -56,11 +61,11 @@ validation.
 3. `tasks/02-configure-github-authentication.md`
 4. `tasks/03-design-repository-catalog.md`
 5. `tasks/04-implement-repository-module.md`
-6. `tasks/05-add-role-template-support.md`
+6. `tasks/05-implement-repository-rulesets.md`
 7. `tasks/06-add-opentofu-tests.md`
 8. `tasks/07-add-ci-plan-workflow.md`
 9. `tasks/08-add-controlled-apply-workflow.md`
-10. `tasks/09-create-pilot-role-repositories.md`
+10. `tasks/09-create-pilot-repositories.md`
 11. `tasks/10-document-operations.md`
 
 Read `AGENTS.md` before executing any task.

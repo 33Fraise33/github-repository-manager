@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repository manages new GitHub repositories owned by a personal account. Its initial consumers are independently versioned Ansible roles. The source of truth is OpenTofu; do not make corresponding GitHub settings changes manually unless an approved recovery procedure requires it.
+This repository manages new GitHub repositories owned by a personal account. The source of truth is OpenTofu; do not make corresponding GitHub settings changes manually unless an approved recovery procedure requires it.
 
 ## Execution Rules
 
@@ -29,7 +29,7 @@ This repository manages new GitHub repositories owned by a personal account. Its
 - Configure the expected GitHub owner explicitly and verify the authenticated identity before live operations.
 - Use a map with stable logical keys for repository resources. Treat key changes as state-address migrations.
 - If a proposed repository already exists but is absent from the expected state, stop and report the collision. Do not import it automatically.
-- Manage only the repository settings declared in this project. Role implementation, release contents, and unrelated account settings remain outside scope unless explicitly assigned.
+- Manage only the repository settings declared in this project. Repository content, release contents, and unrelated account settings remain outside scope unless explicitly assigned.
 
 ## Authentication
 
