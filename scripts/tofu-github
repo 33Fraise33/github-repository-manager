@@ -1,0 +1,24 @@
+#!/bin/sh
+set -eu
+
+unset GITHUB_APP_ID GITHUB_APP_INSTALLATION_ID GITHUB_APP_PEM_FILE
+unset GITHUB_ORGANIZATION GITHUB_OWNER
+
+if [ -n "${GITHUB_TOKEN:-}" ]; then
+  exec tofu "$@"
+fi
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+env_file="$repo_root/.env.github.op"
+
+if [ ! -f "$env_file" ]; then
+  printf '%s\n' "Missing GITHUB_TOKEN. Set it in the environment or create $env_file from .env.github.op.example." >&2
+  exit 1
+fi
+
+if ! command -v op >/dev/null 2>&1; then
+  printf '%s\n' "1Password CLI is required when GITHUB_TOKEN is not already set." >&2
+  exit 1
+fi
+
+exec op run --env-file="$env_file" -- tofu "$@"

@@ -1,6 +1,10 @@
 #!/bin/sh
 set -eu
 
+# Prevent provider environment fallbacks from changing the configured owner.
+unset GITHUB_APP_ID GITHUB_APP_INSTALLATION_ID GITHUB_APP_PEM_FILE
+unset GITHUB_ORGANIZATION GITHUB_OWNER
+
 if [ -n "${AWS_ACCESS_KEY_ID:-}" ] || [ -n "${AWS_SECRET_ACCESS_KEY:-}" ]; then
   : "${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must both be set}"
   : "${AWS_SECRET_ACCESS_KEY:?AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must both be set}"

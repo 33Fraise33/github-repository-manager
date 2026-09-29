@@ -20,6 +20,13 @@ tofu init -backend=false
 tofu validate
 ```
 
+## GitHub Authentication
+
+Authenticated GitHub operations target the personal account `33Fraise33`. Read
+the [authentication guide](docs/authentication.md) before supplying a token.
+Remote authenticated checks additionally require the approved R2 credentials
+and operator approval.
+
 ## State Backend
 
 Cloudflare R2 is the selected remote state backend. Read the [backend ADR](docs/adr/0001-opentofu-state-backend.md) and [R2 backend operating guide](docs/state-backend.md) before initializing it. Routine local validation must use `tofu init -backend=false`; remote initialization and all state-changing operations require explicit operator approval.

@@ -12,6 +12,7 @@ crash.*.log
 .env.*
 !.env.example
 !.env.op.example
+!.env.github.op.example
 
 # Saved plans
 *.tfplan
