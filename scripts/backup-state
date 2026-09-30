@@ -1,0 +1,65 @@
+#!/bin/bash
+set -euo pipefail
+umask 077
+
+export OP_VAULT="Private"
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+
+if [[ "${1:-}" != "--encrypt" ]]; then
+  if [[ $# -ne 0 ]]; then
+    printf '%s\n' 'Usage: scripts/backup-state' >&2
+    exit 1
+  fi
+  : "${OP_VAULT:?Set OP_VAULT to the vault containing opentofu state encryption secret}"
+  for dependency in op gpg tofu; do
+    if ! command -v "$dependency" >/dev/null 2>&1; then
+      printf 'Required command not found: %s\n' "$dependency" >&2
+      exit 1
+    fi
+  done
+  env_file=$(mktemp "${TMPDIR:-/tmp}/tofu-backup-env.XXXXXX")
+  trap 'rm -f "$env_file"' EXIT
+  printf 'TOFU_BACKUP_PASSWORD="op://${OP_VAULT}/opentofu state encryption secret/password"\n' > "$env_file"
+  op run --env-file="$env_file" -- /bin/bash "$repo_root/scripts/backup-state" --encrypt
+  exit 0
+fi
+
+: "${TOFU_BACKUP_PASSWORD:?Run scripts/backup-state without arguments}"
+[[ $# -eq 1 ]] || exit 1
+backup_root="$HOME/Documents/OpenTofu Backups/github-repository-manager"
+mkdir -p "$backup_root"
+backup_dir=$(mktemp -d "$backup_root/backup-$(date -u '+%Y%m%dT%H%M%SZ').XXXXXX")
+partial="$backup_dir/state.tfstate.gpg.partial"
+backup="$backup_dir/state.tfstate.gpg"
+complete=false
+cleanup() {
+  if [[ "$complete" != true ]]; then
+    rm -f "$partial" "$backup"
+    rmdir "$backup_dir" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+# Never write plaintext state or the passphrase to disk. Disable GPG caching
+# and configuration overrides; provide the passphrase on a separate descriptor.
+if ! (unset TOFU_BACKUP_PASSWORD; "$repo_root/scripts/tofu" -chdir="$repo_root" state pull) |
+  gpg --no-options --batch --yes --pinentry-mode loopback --no-symkey-cache \
+    --passphrase-fd 3 --symmetric --cipher-algo AES256 --output "$partial" \
+    3< <(printf '%s\n' "$TOFU_BACKUP_PASSWORD"); then
+  printf '%s\n' 'State download or encryption failed; no backup was retained.' >&2
+  exit 1
+fi
+
+if ! gpg --no-options --batch --pinentry-mode loopback --no-symkey-cache \
+  --passphrase-fd 3 --decrypt "$partial" 3< <(printf '%s\n' "$TOFU_BACKUP_PASSWORD") >/dev/null; then
+  printf '%s\n' 'Backup decryption verification failed; no backup was retained.' >&2
+  exit 1
+fi
+unset TOFU_BACKUP_PASSWORD
+mv "$partial" "$backup"
+complete=true
+printf 'Verified encrypted backup: %s\n' "$backup"
+shasum -a 256 "$backup"

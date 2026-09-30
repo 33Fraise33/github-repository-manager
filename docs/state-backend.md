@@ -97,6 +97,35 @@ Do not store backup state in this repository or an unencrypted local directory.
 The backup path above is illustrative and must be replaced with an approved
 encrypted location.
 
+### One-command encrypted backup
+
+With the approved remote backend already initialized, use:
+
+```sh
+scripts/backup-state
+```
+
+This read-only state export requires the existing OpenTofu/R2 setup, 1Password
+CLI, and GPG (`brew install gnupg` on macOS). Set `OP_VAULT` to your existing
+vault. In that vault, create an item named `opentofu state encryption secret`
+with a strong, unique, single-line passphrase in its `password` field. Keep the
+passphrase recoverable in 1Password for as long as its backups are retained.
+
+The script uses `op run` to retrieve the passphrase for its subprocess, streams
+state directly into AES-256 symmetric GPG encryption, and verifies decryption
+without writing plaintext state to disk. It saves only a verified encrypted
+file under `~/Documents/OpenTofu Backups/github-repository-manager/`, in a unique
+timestamped directory, and prints the path and encrypted-file SHA-256 checksum.
+Documents synchronization is handled externally by Syncthing. Treat these
+encrypted files as sensitive and keep the passphrase separate from them.
+
+The script does not initialize the backend or change state. If state retrieval,
+encryption, or decryption fails, it removes the incomplete backup. Record the
+source commit, working-tree changes, bucket, state key, and workspace alongside
+the backup. A successful decryption check does not replace the isolated recovery
+test below. Never decrypt state into this repository; any restore requires an
+approved encrypted working location and separate approval for state writes.
+
 Test the recovery procedure only against an isolated test state key and only
 with approval covering both the test write and cleanup. A recovery to the
 authoritative state is state-changing and requires explicit approval. Verify
