@@ -38,6 +38,39 @@ tofu test
 
 Test live ruleset behavior only in an explicitly approved disposable public repository.
 
+## Implementation Decisions And Verification
+
+Implementation complete; backend-independent local validation passed on
+2026-09-30 with OpenTofu 1.12.6 and GitHub provider 6.13.0:
+`tofu fmt -check -recursive`, `tofu init -backend=false` using a fresh
+temporary `TF_DATA_DIR`, `tofu validate`, `tofu test` (four mocked plan-only
+runs passed), and `git diff --check`. No live plan or apply was performed.
+
+- The repository module creates a fixed active ruleset for public repositories
+  only. It targets `~DEFAULT_BRANCH`, requires pull requests and resolved review
+  threads, allows zero approvals, and prohibits deletion and force pushes. The
+  permitted merge methods are merge, squash, and rebase.
+- No bypass actors, required status checks, code-owner review, or content rules
+  are configured. Ruleset policy is not a catalog input.
+- Rulesets have literal `prevent_destroy`. A public-to-private visibility
+  transition would make the ruleset instance no longer desired and is blocked
+  from accidental removal.
+- Provider v6.13.0 refuses to create a ruleset on an archived repository and
+  skips ruleset updates while archived. The public ruleset remains declared
+  when archival is set, avoiding a ruleset destroy. Create it before separately
+  approving archival; updates while archived are not guaranteed to reach
+  GitHub.
+- GitHub Free does not provide private-repository rulesets for this personal
+  account. Enabling them later requires an explicit decision to upgrade to
+  GitHub Pro or move management to an appropriate organization plan, followed
+  by a reviewed configuration change.
+- The existing test suite emits deprecation warnings for the repository
+  provider's `default_branch` attribute. This is pre-existing Task 04 policy and
+  outside the scope of Task 05.
+
+Validation was entirely local and used mocked providers. Deployment and live
+ruleset behavior have not been verified.
+
 ## Out Of Scope
 
 - Private repository rulesets on GitHub Free.

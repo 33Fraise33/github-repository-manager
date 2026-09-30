@@ -64,6 +64,24 @@ run "public_repository_settings_without_content" {
     )
     error_message = "Merge policy and both Dependabot settings must reach the provider resources."
   }
+
+  assert {
+    condition = (
+      github_repository_ruleset.default_branch["public"].repository == var.name &&
+      github_repository_ruleset.default_branch["public"].target == "branch" &&
+      github_repository_ruleset.default_branch["public"].enforcement == "active" &&
+      join(",", github_repository_ruleset.default_branch["public"].conditions[0].ref_name[0].include) == "~DEFAULT_BRANCH" &&
+      length(github_repository_ruleset.default_branch["public"].conditions[0].ref_name[0].exclude) == 0 &&
+      github_repository_ruleset.default_branch["public"].rules[0].deletion &&
+      github_repository_ruleset.default_branch["public"].rules[0].non_fast_forward &&
+      github_repository_ruleset.default_branch["public"].rules[0].pull_request[0].required_approving_review_count == 0 &&
+      github_repository_ruleset.default_branch["public"].rules[0].pull_request[0].required_review_thread_resolution &&
+      toset(github_repository_ruleset.default_branch["public"].rules[0].pull_request[0].allowed_merge_methods) == toset(["merge", "squash", "rebase"]) &&
+      length(github_repository_ruleset.default_branch["public"].bypass_actors) == 0 &&
+      length(github_repository_ruleset.default_branch["public"].rules[0].required_status_checks) == 0
+    )
+    error_message = "Public repositories must receive only the fixed active default-branch protection policy."
+  }
 }
 
 run "private_repository_can_be_explicitly_archived" {
@@ -91,5 +109,10 @@ run "private_repository_can_be_explicitly_archived" {
       github_repository_dependabot_security_updates.this.enabled
     )
     error_message = "Private archival must remain explicit with GitHub Free-compatible settings and no content initialization."
+  }
+
+  assert {
+    condition     = length(github_repository_ruleset.default_branch) == 0
+    error_message = "Private repositories must not receive rulesets while the account uses GitHub Free."
   }
 }

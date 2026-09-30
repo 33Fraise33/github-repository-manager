@@ -17,9 +17,9 @@ access tokens, Fine-grained tokens with these settings:
 - No account or organization permissions.
 
 GitHub includes Metadata read-only automatically. Administration read/write is
-required for repository creation, settings, topics, and Dependabot security
-updates. Contents read/write is required to reliably read and manage the merge
-settings used by the repository module.
+required for repository creation, settings, topics, Dependabot security
+updates, and repository rulesets. Contents read/write is required to reliably
+read and manage the merge settings used by the repository module.
 
 Use the shortest practical expiration and record the expiry in the approved
 secret manager. Review these permissions when Tasks 04 and 05 finalize the

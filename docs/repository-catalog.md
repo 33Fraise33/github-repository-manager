@@ -61,7 +61,12 @@ switches:
 - Public repositories receive an active default-branch ruleset requiring pull
   requests and resolved review threads, allowing zero required approvals, and
   prohibiting branch deletion and force pushes. It allows merge, squash, and
-  rebase methods.
+  rebase methods. The ruleset targets `~DEFAULT_BRANCH`, not a configured branch
+  name; empty repositories rely on the account default-branch configuration.
+- Private repositories receive no ruleset while the personal account uses
+  GitHub Free. Enabling private rulesets requires an explicit future decision to
+  upgrade to GitHub Pro or migrate to an organization plan such as GitHub Team;
+  the configuration must then be deliberately reviewed and changed.
 
 `features.issues = false` or `features.discussions = true` requires a concise,
 non-empty `features.justification`. No other feature override is supported.
@@ -71,8 +76,18 @@ cleanup, auto-merge, and default-branch protections are intentional consistent
 defaults. Required status checks are not managed because their names are
 repository-content-specific.
 GitHub Pro is required to enforce this ruleset on private repositories owned by
-a personal account. While this account uses GitHub Free, task 05 applies the
-ruleset only to public repositories.
+a personal account. While this account uses GitHub Free, the module applies the
+ruleset only to public repositories. Rulesets use `prevent_destroy`; changing a
+public repository to private would therefore propose a blocked ruleset destroy
+and requires explicit operator review and a deliberate migration decision.
+
+The pinned GitHub provider refuses to create a ruleset on an archived
+repository, and skips ruleset updates while a repository is archived. The
+configuration retains the public ruleset when archival is declared so that
+archiving does not propose its destruction. Create and configure the ruleset
+before any separately approved archive operation. Ruleset updates on an already
+archived repository are not guaranteed to reach GitHub; resolve such changes
+through an explicitly reviewed operational decision.
 
 ## Deliberately Unmanaged Settings
 
@@ -85,9 +100,8 @@ content.
 Organization-only controls remain out of scope for this personal account:
 organizations, teams, organization roles, organization secrets and variables,
 organization rulesets, member policies, billing, and enterprise controls. Branch
-protection rules are not used; task 05 will implement the fixed public
-repository ruleset policy defined above. Required status checks are deliberately
-unmanaged.
+protection rules are not used; task 05 implements the fixed public repository
+ruleset policy defined above. Required status checks are deliberately unmanaged.
 
 ## Module Outputs
 
