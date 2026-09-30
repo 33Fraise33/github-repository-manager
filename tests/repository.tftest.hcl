@@ -52,6 +52,84 @@ run "sample_catalog_plans_from_empty_state" {
     ])
     error_message = "Each catalog entry must reach the corresponding repository module."
   }
+
+  assert {
+    condition = (
+      local.repositories["public-example"].name == "example-public-repository" &&
+      local.repositories["private-example"].name == "example-private-repository" &&
+      local.repositories["public-example"].features.issues &&
+      local.repositories["private-example"].features.issues &&
+      !local.repositories["public-example"].features.discussions &&
+      !local.repositories["private-example"].features.discussions &&
+      local.repository_defaults.default_branch == "main" &&
+      !local.repository_defaults.has_wiki &&
+      !local.repository_defaults.has_discussions
+    )
+    error_message = "Stable catalog keys must wire repositories with the fixed main-branch and feature defaults."
+  }
+
+  assert {
+    condition = (
+      local.repository_defaults.delete_branch_on_merge &&
+      local.repository_defaults.allow_squash_merge &&
+      local.repository_defaults.allow_merge_commit &&
+      local.repository_defaults.allow_rebase_merge &&
+      local.repository_defaults.squash_merge_commit_title == "PR_TITLE" &&
+      local.repository_defaults.squash_merge_commit_message == "PR_BODY"
+    )
+    error_message = "Root catalog wiring must apply the fixed merge policy and head-branch cleanup."
+  }
+
+  assert {
+    condition = (
+      local.repository_defaults.allow_auto_merge &&
+      var.repositories["public-example"].visibility == "public" &&
+      var.repositories["private-example"].visibility == "private"
+    )
+    error_message = "Auto-merge must follow GitHub Free availability for public and private repositories."
+  }
+}
+
+run "empty_catalog_plans_without_repository_instances" {
+  command = plan
+
+  variables {
+    repositories = {}
+  }
+
+  assert {
+    condition     = length(output.repositories) == 0 && length(module.repository) == 0
+    error_message = "An empty catalog must preserve an empty output and create no repository instances."
+  }
+}
+
+run "justified_feature_override_reaches_repository" {
+  command = plan
+
+  variables {
+    repositories = {
+      justified-override = {
+        name        = "justified-override"
+        description = "Placeholder."
+        visibility  = "public"
+        topics      = []
+        archived    = false
+        features = {
+          discussions   = true
+          justification = "Exercise explicitly justified feature wiring."
+        }
+      }
+    }
+  }
+
+  assert {
+    condition = (
+      local.repositories["justified-override"].features.issues &&
+      local.repositories["justified-override"].features.discussions &&
+      output.repositories["justified-override"].name == "justified-override"
+    )
+    error_message = "A justified catalog feature exception must reach only its stable-key repository instance."
+  }
 }
 
 run "sample_catalog_outputs_are_provider_attributes" {

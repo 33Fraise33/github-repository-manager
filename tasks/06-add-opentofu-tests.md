@@ -35,6 +35,34 @@ tofu validate
 tofu test
 ```
 
+## Implementation Decisions And Verification
+
+Implementation complete; local validation passed on 2026-09-30 with OpenTofu
+1.12.6 and GitHub provider 6.13.0. `tofu init -backend=false` used a dedicated
+temporary `TF_DATA_DIR`; `tofu test` ran with `GITHUB_TOKEN` unset. All test
+runs use a mocked GitHub provider and `command = plan`; no GitHub API or remote
+state backend was used.
+
+- Added plan-only rejection cases for invalid catalog keys and names, names over
+  100 characters, duplicate names, unsupported visibility, malformed or
+  oversized topics, more than 20 topics, non-HTTPS homepages, unjustified
+  feature overrides, and synthetic credential assignments. Valid boundary
+  lengths and justified feature overrides are also covered.
+- Expanded root wiring checks for empty and populated catalogs, stable-key
+  outputs, fixed defaults, and feature override propagation. Existing module
+  tests cover repository metadata and safe settings, auto-merge, Dependabot,
+  archive behavior, full public ruleset behavior, and private ruleset omission.
+- Added a source regression assertion that repository and ruleset resources
+  retain literal `prevent_destroy = true`. A stateful destroy attempt is not a
+  routine test: lifecycle protection blocked both planning the destroy and
+  cleanup in the prior mocked probe. Actual destructive behavior is therefore
+  covered by the required lifecycle declaration and the reviewed plan process.
+- The suite passes 18 runs. OpenTofu emits the previously documented provider
+  deprecation warning for `github_repository.default_branch`; changing that
+  implementation is outside this task.
+
+Deployment and live GitHub behavior have not been performed or verified.
+
 ## Out Of Scope
 
 - Testing actual GitHub API behavior in every pull request.

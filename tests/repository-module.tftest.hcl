@@ -67,6 +67,14 @@ run "public_repository_settings_without_content" {
 
   assert {
     condition = (
+      can(regex("prevent_destroy\\s*=\\s*true", file("${path.root}/main.tf"))) &&
+      can(regex("prevent_destroy\\s*=\\s*true", file("${path.root}/ruleset.tf")))
+    )
+    error_message = "Repository and ruleset resources must retain literal destruction protection."
+  }
+
+  assert {
+    condition = (
       github_repository_ruleset.default_branch["public"].repository == var.name &&
       github_repository_ruleset.default_branch["public"].target == "branch" &&
       github_repository_ruleset.default_branch["public"].enforcement == "active" &&
