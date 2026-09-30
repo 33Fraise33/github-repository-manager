@@ -88,10 +88,12 @@ or by using a broader classic PAT.
 
 ## CI Contract
 
-Tasks 07 and 08 will store this PAT only as the repository secret
-`REPOSITORY_ADMIN_TOKEN`. Trusted authenticated OpenTofu plan or apply steps
-will map that secret to `GITHUB_TOKEN` only for the command that needs it.
+The optional trusted plan in Task 07 reads this PAT only from the protected
+`repository-plan` environment secret `REPOSITORY_ADMIN_TOKEN`. It maps the
+secret to `GITHUB_TOKEN` only in the authenticated plan job, after environment
+approval, and checks the authenticated account before using the remote backend.
 Credential-free formatting, validation, and mocked tests must not receive the
-PAT. Fork pull requests, `pull_request_target`, `workflow_run`, plan summaries,
-artifacts, and the automatic Actions `GITHUB_TOKEN` must not be used to expose
-or substitute this credential.
+PAT. Fork pull requests never receive the PAT. `pull_request_target`,
+`workflow_run`, plan summaries, artifacts, and the automatic Actions
+`GITHUB_TOKEN` must not expose or substitute this credential. See the [CI
+guide](ci.md) before enabling trusted plans.

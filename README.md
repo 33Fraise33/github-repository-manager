@@ -35,6 +35,13 @@ Use `scripts/tofu` only for approved credentialed R2 operations. It loads R2
 credentials for its OpenTofu subprocess and is not required for routine local
 validation.
 
+## Continuous Integration
+
+Pull requests and pushes to `main` run formatting, backend-disabled
+initialization, validation, and the mocked OpenTofu test suite. This job has no
+GitHub PAT or R2 credentials. See [the CI guide](docs/ci.md) for the optional,
+protected-environment trusted speculative plan setup.
+
 ## Scope
 
 - Create and manage newly created repositories with normalized lowercase,

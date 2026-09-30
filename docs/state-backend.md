@@ -107,9 +107,13 @@ to resolve an uncertain situation; stop and investigate first.
 
 ## CI Credentials
 
-A future trusted CI apply workflow will receive the R2 access key and secret
-only from protected repository secrets. GitHub Actions OIDC does not directly
-issue R2 S3 API credentials, so the token must stay narrowly scoped to this
-bucket and be rotated on a defined schedule and immediately after suspected
-exposure. Fork pull requests and untrusted workflow contexts must never receive
-these credentials.
+The optional trusted speculative-plan workflow receives the R2 access key and
+secret only from the protected `repository-plan` environment secrets. GitHub
+Actions OIDC does not directly issue R2 S3 API credentials, so the token must
+stay narrowly scoped to this bucket and be rotated on a defined schedule and
+immediately after suspected exposure. Fork pull requests and untrusted workflow
+contexts must never receive these credentials. See [the CI guide](ci.md) for
+the approval and enablement requirements. Initialization and plans can access
+remote state and locks; obtain explicit operator approval for the identified
+account, bucket, state key, workspace, and operations before enabling the plan
+job.
