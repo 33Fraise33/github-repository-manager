@@ -7,6 +7,7 @@ repositories = {
     description = "Placeholder public repository."
     visibility  = "public"
     topics      = ["example", "public"]
+    archived    = false
     homepage    = "https://example.invalid/example-public-repository"
   }
 
@@ -15,5 +16,6 @@ repositories = {
     description = "Placeholder private repository."
     visibility  = "private"
     topics      = ["example", "private"]
+    archived    = false
   }
 }

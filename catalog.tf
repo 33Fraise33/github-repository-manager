@@ -6,6 +6,7 @@ variable "repositories" {
     description = string
     visibility  = string
     topics      = set(string)
+    archived    = bool
     homepage    = optional(string)
     features = optional(object({
       issues        = optional(bool, true)
@@ -91,6 +92,8 @@ locals {
     allow_auto_merge            = true
     squash_merge_commit_title   = "PR_TITLE"
     squash_merge_commit_message = "PR_BODY"
+    vulnerability_alerts        = true
+    dependabot_security_updates = true
   }
 
   public_default_branch_ruleset = {
