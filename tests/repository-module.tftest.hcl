@@ -31,6 +31,11 @@ run "public_repository_settings_without_content" {
   }
 
   assert {
+    condition     = length(github_repository_environment.this) == 0 && length(github_repository_environment_deployment_policy.this) == 0 && length(github_actions_environment_variable.this) == 0
+    error_message = "Omitted environments must create no environment-related resources."
+  }
+
+  assert {
     condition = (
       github_repository.this.name == var.name &&
       github_repository.this.description == var.description &&
@@ -90,6 +95,241 @@ run "public_repository_settings_without_content" {
     )
     error_message = "Public repositories must receive only the fixed active default-branch protection policy."
   }
+}
+
+run "multiple_nonsecret_environments" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables {
+    environments = {
+      production = {
+        name                = "Production"
+        reviewers           = [101, 102]
+        prevent_self_review = true
+        wait_timer          = 30
+        can_admins_bypass   = false
+        deployment_mode     = "custom"
+        deployment_rules = {
+          release-branch = { type = "branch", pattern = "release/*" }
+          release-tag    = { type = "tag", pattern = "v*" }
+        }
+        variables = { REGION = "example-region" }
+      }
+      staging = { name = "Staging", deployment_mode = "protected", can_admins_bypass = true }
+      preview = { name = "Preview" }
+    }
+  }
+  assert {
+    condition = (
+      toset(keys(github_repository_environment.this)) == toset(["production", "staging", "preview"]) &&
+      alltrue([for env in values(github_repository_environment.this) : env.repository == var.name]) &&
+      github_repository_environment.this["production"].environment == "Production" &&
+      github_repository_environment.this["production"].wait_timer == 30 &&
+      github_repository_environment.this["production"].prevent_self_review &&
+      !github_repository_environment.this["production"].can_admins_bypass &&
+      github_repository_environment.this["production"].reviewers[0].users == toset([101, 102]) &&
+      github_repository_environment.this["production"].deployment_branch_policy[0].custom_branch_policies &&
+      !github_repository_environment.this["production"].deployment_branch_policy[0].protected_branches &&
+      github_repository_environment.this["staging"].deployment_branch_policy[0].protected_branches &&
+      !github_repository_environment.this["staging"].deployment_branch_policy[0].custom_branch_policies &&
+      github_repository_environment.this["staging"].can_admins_bypass &&
+      length(github_repository_environment.this["preview"].deployment_branch_policy) == 0
+    )
+    error_message = "Stable environment keys and all supported protections must reach repository-scoped provider resources."
+  }
+  assert {
+    condition = (
+      github_repository_environment_deployment_policy.this["production/release-branch"].branch_pattern == "release/*" &&
+      github_repository_environment_deployment_policy.this["production/release-tag"].tag_pattern == "v*" &&
+      alltrue([for rule in values(github_repository_environment_deployment_policy.this) : rule.repository == var.name && rule.environment == "Production"]) &&
+      github_actions_environment_variable.this["production/REGION"].repository == var.name &&
+      github_actions_environment_variable.this["production/REGION"].environment == "Production" &&
+      github_actions_environment_variable.this["production/REGION"].variable_name == "REGION" &&
+      github_actions_environment_variable.this["production/REGION"].value == "example-region"
+    )
+    error_message = "Stable rule and variable addresses must be isolated to their repository and environment."
+  }
+  assert {
+    condition     = length(regexall("prevent_destroy\\s*=\\s*true", file("${path.root}/environments.tf"))) == 3
+    error_message = "All three environment resource types must retain literal prevent_destroy protection."
+  }
+}
+
+run "explicit_empty_environments" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = {} }
+  assert {
+    condition     = length(github_repository_environment.this) == 0
+    error_message = "Explicit empty environments must remain opt-out."
+  }
+}
+
+run "environment_boundary_values" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables {
+    environments = {
+      stable-key = {
+        name       = join("", [for _ in range(255) : "a"])
+        reviewers  = [1, 2, 3, 4, 5, 6]
+        wait_timer = 43200
+        variables = merge({ for i in range(99) : "VAR_${i}" => "example" }, {
+          MAX_BYTES = join("", [for _ in range(24) : join("", [for _ in range(1024) : "é"])])
+        })
+      }
+    }
+  }
+  assert {
+    condition = (
+      toset(keys(github_repository_environment.this)) == toset(["stable-key"]) &&
+      github_repository_environment.this["stable-key"].wait_timer == 43200 &&
+      length(github_actions_environment_variable.this) == 100 &&
+      length(base64encode(github_actions_environment_variable.this["stable-key/MAX_BYTES"].value)) == 65536
+    )
+    error_message = "Inclusive API limits must work, including 48 KiB UTF-8 values and keys independent of names."
+  }
+}
+
+run "reject_negative_timer" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = { production = { name = "Prod", wait_timer = -1 } } }
+  expect_failures = [var.environments]
+}
+
+run "reject_fractional_timer" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = { production = { name = "Prod", wait_timer = 1.5 } } }
+  expect_failures = [var.environments]
+}
+
+run "reject_private_environments" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables {
+    visibility       = "private"
+    allow_auto_merge = false
+    environments     = { production = { name = "Production" } }
+  }
+  expect_failures = [var.environments]
+}
+
+run "reject_duplicate_environment_names" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = { first = { name = "Prod" }, second = { name = "prod" } } }
+  expect_failures = [var.environments]
+}
+
+run "reject_invalid_environment_key_and_name" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = { "Bad/Key" = { name = " " } } }
+  expect_failures = [var.environments]
+}
+
+run "reject_oversized_environment_name" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = { production = { name = join("", [for _ in range(256) : "a"]) } } }
+  expect_failures = [var.environments]
+}
+
+run "reject_invalid_reviewer_ids_and_timer" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = { production = { name = "Prod", reviewers = [-1, 1.5], wait_timer = 43201 } } }
+  expect_failures = [var.environments]
+}
+
+run "reject_more_than_six_reviewers" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = { production = { name = "Prod", reviewers = [1, 2, 3, 4, 5, 6, 7] } } }
+  expect_failures = [var.environments]
+}
+
+run "reject_self_review_without_reviewers" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = { production = { name = "Prod", prevent_self_review = true } } }
+  expect_failures = [var.environments]
+}
+
+run "reject_unsupported_protections" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = { production = { name = "Prod", reviewer_teams = [1], custom_protection_rules = [2] } } }
+  expect_failures = [var.environments]
+}
+
+run "reject_empty_custom_rules" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = { production = { name = "Prod", deployment_mode = "custom" } } }
+  expect_failures = [var.environments]
+}
+
+run "reject_rules_in_all_mode" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = { production = { name = "Prod", deployment_rules = { main = { type = "branch", pattern = "main" } } } } }
+  expect_failures = [var.environments]
+}
+
+run "reject_invalid_rule_and_duplicate_pattern" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables {
+    environments = { production = { name = "Prod", deployment_mode = "custom", deployment_rules = {
+      first = { type = "branch", pattern = "main" }, second = { type = "branch", pattern = "main" }, third = { type = "unsupported", pattern = "" }
+    } } }
+  }
+  expect_failures = [var.environments]
+}
+
+run "reject_invalid_variable_names" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = { production = { name = "Prod", variables = { GITHUB_RESERVED = "example", lower = "example", "1DIGIT" = "example" } } } }
+  expect_failures = [var.environments]
+}
+
+run "reject_variable_limits" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = { production = { name = "Prod", variables = { for i in range(101) : "VAR_${i}" => "example" } } } }
+  expect_failures = [var.environments]
+}
+
+run "reject_oversized_variable_bytes" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = { production = { name = "Prod", variables = { VALUE = join("", [for _ in range(49) : join("", [for _ in range(1024) : "é"])]) } } } }
+  expect_failures = [var.environments]
+}
+
+run "reject_credential_signature_variable" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = { production = { name = "Prod", variables = { VALUE = "api_key=synthetic-placeholder" } } } }
+  expect_failures = [var.environments]
+}
+
+run "reject_valid_secret_references_pending_task07b" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = { production = { name = "Prod", secret_refs = { DEPLOY_CREDENTIAL = { vault = "<vault>", item = "<item>", field = "<field>" } } } } }
+  expect_failures = [var.environments]
+}
+
+run "reject_invalid_secret_reference_metadata" {
+  command = plan
+  module { source = "./modules/repository" }
+  variables { environments = { production = { name = "Prod", secret_refs = { GITHUB_RESERVED = { vault = "", item = "<item>", field = "<field>" } } } } }
+  expect_failures = [var.environments]
 }
 
 run "private_repository_can_be_explicitly_archived" {

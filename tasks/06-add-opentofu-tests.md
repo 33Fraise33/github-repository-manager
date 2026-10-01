@@ -63,6 +63,18 @@ state backend was used.
 
 Deployment and live GitHub behavior have not been performed or verified.
 
+## Pending Extension: Tasks 07a And 07b
+
+Retain the credential-free, mocked `tofu test` suite and completed history above.
+Task 07a adds plan-only cases for zero/multiple environments, stable wiring,
+protection and branch/tag rules, variables, reference validation, unsupported
+capabilities and lifecycle/weakening review. Task 07b adds synthetic-only tests
+for the compatibility gate, missing/inaccessible references, fail-closed errors,
+rotation and saved plans, and canary absence from state, plans, logs and artifacts.
+Inspect new mocks, aliases and helpers; no real GitHub or 1Password credentials
+may be required. Record gaps in ephemeral/write-only test support rather than
+claiming mocks prove the providers safe. This coverage remains pending.
+
 ## Out Of Scope
 
 - Testing actual GitHub API behavior in every pull request.

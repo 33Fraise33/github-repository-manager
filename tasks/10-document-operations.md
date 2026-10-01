@@ -8,6 +8,8 @@ operators can create, modify, archive, and recover repositories consistently.
 ## Prerequisites
 
 - Tasks 00 through 09 are complete.
+- Tasks 07a and 07b are evaluated before Task 08; document any blocked secret
+  capability rather than treating it as completed implementation.
 
 ## Required Work
 
@@ -32,6 +34,20 @@ operators can create, modify, archive, and recover repositories consistently.
 - Review every documented command for safety and accuracy.
 - Confirm README links to operations documentation and all ADRs.
 - Run the standard read-only validation suite.
+
+## Pending Extension: Environment And 1Password Operations
+
+Document optional zero/multiple environments, stable keys, supported protection
+and branch/tag settings, variables, placeholder-only secret references, and the
+account/API/pinned-provider capability matrix from Task 07a. Explain removal,
+rename and protection-weakening review and that omission does not import existing
+environments. Record Task 07b's proven ephemeral/write-only path or explicit
+blocked status, dedicated read-only restricted-vault service account, external
+token storage, rotation/revocation and saved-plan/re-retrieval constraints.
+Distinguish nonsecret configuration from secrets that must never enter state,
+plans, logs or artifacts. Update operational docs only when these later tasks
+establish evidence; preserve completed history and do not claim deployment.
+README is unchanged by this task-plan revision because its scope is task files.
 
 ## Out Of Scope
 

@@ -54,6 +54,13 @@ protected-environment trusted speculative plan setup.
 
 New repositories are declared through the typed [`repositories` catalog](docs/repository-catalog.md). The catalog is empty by default; its example file contains placeholders only and does not create repositories.
 
+Public repositories may optionally declare zero or more
+[nonsecret GitHub environments](docs/environments.md), including supported
+protection settings, deployment branch/tag rules, and Actions variables. Private
+environments are rejected under the personal GitHub Free contract. Secret
+references are typed metadata but remain explicitly blocked pending Task 07b;
+no secret retrieval or writes are enabled.
+
 ## Non-goals
 
 - Importing or changing existing repositories.
@@ -71,8 +78,10 @@ New repositories are declared through the typed [`repositories` catalog](docs/re
 6. `tasks/05-implement-repository-rulesets.md`
 7. `tasks/06-add-opentofu-tests.md`
 8. `tasks/07-add-ci-plan-workflow.md`
-9. `tasks/08-add-controlled-apply-workflow.md`
-10. `tasks/09-create-pilot-repositories.md`
-11. `tasks/10-document-operations.md`
+9. `tasks/07a-add-github-environments.md`
+10. `tasks/07b-add-ephemeral-1password-secret-retrieval.md`
+11. `tasks/08-add-controlled-apply-workflow.md`
+12. `tasks/09-create-pilot-repositories.md`
+13. `tasks/10-document-operations.md`
 
 Read `AGENTS.md` before executing any task.

@@ -79,6 +79,18 @@ Compatibility is checked against provider source and GitHub documentation.
 Actual API behavior and deployment require the separately approved pilot apply;
 no real repository or remote state changes are required to complete this task.
 
+## Pending Extension: Tasks 07a And 07b
+
+The implementation history above covers repositories and rulesets, not
+environments. Task 07a will add module-managed environment resources, protection
+and deployment rules, and variables keyed by stable repository/environment keys.
+Omitted environments create no resources or implicit ownership of existing
+environments; removing previously managed entries requires lifecycle review.
+Review removals, renames and protection weakening without relaxing existing
+destruction safeguards. Task 07b must prove the ephemeral/write-only secret path
+before module secret writes are enabled; unsupported paths remain blocked.
+This extension is pending, not part of the completed verification above.
+
 ## Out Of Scope
 
 - Repository content.

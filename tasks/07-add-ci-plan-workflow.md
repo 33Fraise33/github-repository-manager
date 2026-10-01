@@ -33,6 +33,20 @@ changes.
 - Review workflow permissions and event conditions manually.
 - Trigger a same-repository test pull request and a fork-equivalent test where feasible.
 
+## Pending Extension And Task Order
+
+Task order is **07 → 07a → 07b → 08**. The implementation record below remains
+historical; it does not verify environments or secret retrieval. After Task 07a,
+extend sanitized plan review to environment removal, rename and protection
+weakening. After Task 07b's compatibility gate passes, review any credentialed
+CI changes for an external `OP_SERVICE_ACCOUNT_TOKEN` released only to the
+authorized OpenTofu step after approval of the exact trusted commit. Validation
+and mocked tests remain credential free; forks and untrusted code never receive
+the PAT or service-account token. Do not use `pull_request_target` or
+`workflow_run` for secret-bearing untrusted execution. Summaries/artifacts must
+not expose retrieved values, credentials, state or reusable plans. These
+extensions are pending; this task authorizes no retrieval or live operation.
+
 ## Out Of Scope
 
 - Applying OpenTofu from CI.
