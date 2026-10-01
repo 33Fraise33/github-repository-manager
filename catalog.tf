@@ -8,6 +8,26 @@ variable "repositories" {
     topics      = set(string)
     archived    = bool
     homepage    = optional(string)
+    environments = optional(map(object({
+      name                    = string
+      reviewers               = optional(set(number), [])
+      reviewer_teams          = optional(set(number), [])
+      prevent_self_review     = optional(bool, false)
+      wait_timer              = optional(number, 0)
+      can_admins_bypass       = optional(bool, false)
+      custom_protection_rules = optional(set(number), [])
+      deployment_mode         = optional(string, "all")
+      deployment_rules = optional(map(object({
+        type    = string
+        pattern = string
+      })), {})
+      variables = optional(map(string), {})
+      secret_refs = optional(map(object({
+        vault = string
+        item  = string
+        field = string
+      })), {})
+    })), {})
     features = optional(object({
       issues        = optional(bool, true)
       discussions   = optional(bool, false)

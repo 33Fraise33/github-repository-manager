@@ -2,7 +2,7 @@
 set -euo pipefail
 umask 077
 
-export OP_VAULT="Private"
+export OP_VAULT="OpenTofus"
 
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 

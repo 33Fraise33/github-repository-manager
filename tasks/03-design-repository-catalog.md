@@ -33,6 +33,17 @@ tofu validate
 tofu test
 ```
 
+## Pending Extension: Tasks 07a And 07b
+
+Extend the initial catalog only under Task 07a with an optional typed
+`environments` map defaulting to `{}`, stable keys, explicit names, protection
+settings, branch/tag policies, nonsecret variables and secret-reference maps.
+References contain vault/item/field identifiers only, never secret values;
+examples use placeholders. Validate account/API/pinned-provider compatibility
+and fail on unsupported settings. Task 07b gates all secret retrieval/writes.
+Existing catalog behavior and completed work remain unchanged until this pending
+extension is implemented.
+
 ## Out Of Scope
 
 - Module resource implementation.

@@ -10,6 +10,7 @@ module "repository" {
   topics                      = each.value.topics
   homepage                    = each.value.homepage
   archived                    = each.value.archived
+  environments                = each.value.environments
   has_issues                  = each.value.features.issues
   has_discussions             = each.value.features.discussions
   has_projects                = local.repository_defaults.has_projects

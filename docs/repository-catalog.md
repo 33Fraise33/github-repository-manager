@@ -22,6 +22,7 @@ and is not loaded automatically.
 | `archived` | Yes | Explicit lifecycle state. Set to `true` to archive; do not remove the catalog entry. |
 | `homepage` | No | HTTPS URL only. |
 | `features` | No | Only the documented `issues` and `discussions` exceptions. |
+| `environments` | No | Opt-in map of nonsecret environments; defaults to `{}`. See the [environment capability and operating contract](environments.md). |
 
 Repository names, topic syntax, topic counts, visibility, homepage URLs, known
 credential signatures, and duplicate names are validated before a plan can run.
@@ -92,10 +93,16 @@ through an explicitly reviewed operational decision.
 ## Deliberately Unmanaged Settings
 
 This project manages only the repository settings declared in the catalog and
-the repository module introduced in task 04. It does not manage collaborators,
-repository invitations, deploy keys, webhooks, GitHub Apps, Actions secrets or
-variables, environments, Pages, releases, labels, milestones, or repository
-content.
+the repository module introduced in task 04. Task 07a adds opt-in module-managed
+environments, supported protections, deployment branch/tag rules, and nonsecret
+Actions environment variables; see the [environment contract](environments.md)
+for capabilities, lifecycle protection, and required review. Omitted or empty
+environment maps leave existing unmanaged environments alone. Environment
+secrets remain blocked pending Task 07b.
+
+Collaborators, repository invitations, deploy keys, webhooks, GitHub Apps,
+repository-level Actions secrets and variables, Pages, releases, labels,
+milestones, repository content, and unrelated configuration remain unmanaged.
 
 Organization-only controls remain out of scope for this personal account:
 organizations, teams, organization roles, organization secrets and variables,

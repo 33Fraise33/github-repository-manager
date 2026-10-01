@@ -103,6 +103,35 @@ run "empty_catalog_plans_without_repository_instances" {
   }
 }
 
+run "environment_catalog_is_optional_and_repository_scoped" {
+  command = plan
+  variables {
+    repositories = {
+      first = {
+        name         = "first-repository", description = "Placeholder.", visibility = "public", topics = [], archived = false
+        environments = { production = { name = "Production", variables = { REGION = "first-region" } } }
+      }
+      second = {
+        name         = "second-repository", description = "Placeholder.", visibility = "public", topics = [], archived = false
+        environments = { production = { name = "Production", variables = { REGION = "second-region" } }, staging = { name = "Staging" } }
+      }
+      third = {
+        name = "third-repository", description = "Placeholder.", visibility = "private", topics = [], archived = false
+      }
+    }
+  }
+  assert {
+    condition = (
+      local.repositories.first.environments.production.variables.REGION == "first-region" &&
+      local.repositories.second.environments.production.variables.REGION == "second-region" &&
+      length(local.repositories.second.environments) == 2 &&
+      length(local.repositories.third.environments) == 0 &&
+      length(output.repositories) == 3
+    )
+    error_message = "The root typed catalog must retain independent optional environment maps per stable repository key."
+  }
+}
+
 run "justified_feature_override_reaches_repository" {
   command = plan
 

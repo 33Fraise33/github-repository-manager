@@ -34,6 +34,17 @@ tofu plan -refresh-only
 
 The operator must provide `GITHUB_TOKEN`; do not request or print it.
 
+## Pending Extension: Tasks 07a And 07b
+
+Revisit the least-privilege GitHub PAT permissions for environment settings,
+variables and secrets using API/provider evidence; do not broaden them silently.
+Task 07b adds a separate dedicated read-only 1Password service account restricted
+to the intended vault, with `OP_SERVICE_ACCOUNT_TOKEN` supplied externally only
+to the authorized trusted OpenTofu step. Document its expiry, rotation and
+revocation without retrieving secrets. Existing PAT authentication is not proof
+of an ephemeral environment-secret path; that path remains compatibility-gated.
+This extension is pending and does not change prior authentication work.
+
 ## Out Of Scope
 
 - Creating a real repository.
